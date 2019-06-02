@@ -5,6 +5,8 @@ A web component for creating, editing, or displaying polyominos (i.e. generaliza
 Useful for games, applications, or solvers that require the user to specify certain polyominos.
 See examples of usage [here](https://cemulate.github.io/polyomino-solver).
 
+[Install from npm](https://www.npmjs.com/package/web-component-polyomino)
+
 ## Usage
 
 The library provides:
