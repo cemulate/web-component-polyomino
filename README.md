@@ -9,20 +9,18 @@ See examples of usage [here](https://cemulate.github.io/polyomino-solver).
 
 ## Usage
 
-The library provides:
-
-* `Polyomino`: A class representing a polyomino, can be created from integer coordinates and manipulated via transformations
-* `PolyominoControl`: The actual web component for displaying and editing `Polyomino` instances.
-* `tetrominos`: An object containing the standard tetrominos from Tetris, keyed by their standard one-letter designation (I, O, T, J, L, S, Z).
-
-First, register the web component in your main entry point:
+Import the library in your main entrypoint:
 
 ```
-import { PolyominoControl } from 'web-component-polyomino';
-window.customElements.define('polyomino-control', PolyominoControl);
+import 'web-component-polyomino';
 ```
 
-It can now be used in HTML directly as with:
+Or with a script tag (using unpkg), as:
+```
+<script src="https://unpkg.com/web-component-polyomino@1/dist/web-component-polyomino.js"/>
+```
+
+The custom element is now available and may be used in HTML directly as with:
 ```
 <polyomino-control id="editor" size=10 mode="create-region"></polyomino-control>
 ```
@@ -35,6 +33,24 @@ el.mode = 'display';
 document.getElementById('poly-container').appendChild(el);
 ```
 
+The library also exports the following:
+
+* `PolyominoControl`: The actual web component for displaying and editing `Polyomino` instances.
+It is registered as the custom element `polyomino-control` during import, so there should be no need to access this class directly.
+* `Polyomino`: A class representing a polyomino, can be created from integer coordinates and manipulated via transformations.
+The objects that are manipulated by `PolyominoControl` elements.
+* `tetrominos`: An object containing `Polyomino`s for the standard tetrominos from Tetris, keyed by their standard one-letter designation (I, O, T, J, L, S, Z).
+
+One can access these with:
+```
+import { Polyomino, tetrominos } from 'web-component-polyomino';
+```
+
+Or, if using the unkpg script tag,
+```
+const Polyomino = window.webComponentPolyomino.Polyomino;
+const tetrominos = window.webComponentPolyomino.tetrominos;
+```
 
 `PolyominoControl` elements expose two custom attributes:
 
