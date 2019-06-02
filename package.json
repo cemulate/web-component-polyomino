@@ -1,0 +1,26 @@
+{
+  "name": "web-component-polyomino",
+  "version": "1.0.0",
+  "description": "Web component for creating, editing, or displaying polyominos",
+  "main": "dist/web-component-polyomino.js",
+  "module": "src/index.js",
+  "scripts": {
+    "build": "webpack --mode production"
+  },
+  "keywords": [
+    "polyomino",
+    "web component",
+    "tetris"
+  ],
+  "author": "Chase Meadors <c.ed.mead@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "pleasejs": "^0.4.2",
+    "snapsvg": "^0.5.1"
+  },
+  "devDependencies": {
+    "imports-loader": "^0.8.0",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
+  }
+}
