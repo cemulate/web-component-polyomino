@@ -1,239 +1,135 @@
-import { Polyomino } from './Polyomino.js';
-// https://github.com/adobe-webplatform/Snap.svg/issues/341#issuecomment-94041277
-import Snap from 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg-min.js';
+import { LitElement, html, css } from 'lit-element';
 import Please from 'pleasejs';
 
-const _intTransform = x => parseInt(x, 10);
+function* coords(size) {
+    for (let i = 0; i < size; i ++) {
+        for (let j = 0; j < size; j ++) {
+            yield [ i, j ];
+        }
+    }
+}
 
-export default class PolyominoControl extends HTMLElement {
+function compareCoords(a, b) {
+    return a[0] == b[0] && a[1] == b[1];
+}
 
+export default class PolyominoControl extends LitElement {
+    static get properties() {
+        return {
+            // One of: 'create', 'create-region', 'display', or 'display-multiple'
+            mode: { type: String },
+            // The (square) integer size of the grid
+            size: { type: Number },
+            // The polyomino to display, as a list of integer coordinates [ [ x1, y1 ], [ x2, y2 ], ... ]
+            // OR, in 'display-multiple' mode, a list of such polyominos
+            value: { type: Array },
+        };
+    }
+    static get styles() {
+        return css`
+            .grid-container {
+                display: grid;
+                width: 100%;
+                height: 100%;
+                outline: 2px solid black;
+                grid-template: repeat($rows, 1fr) / repeat($columns, 1fr);
+                grid-gap: 2px;
+            }
+            .grid-container.display {
+                outline: none;
+            }
+            .grid-container.create-region, .grid-container.display-multiple {
+                background: lightgray;
+            }
+            
+            .cell {
+                outline: 2px solid black;
+            }
+
+            .grid-container.display .cell {
+                outline: none;
+            }
+
+            .grid-container.display .cell.active, .grid-container.display-multiple .cell.active {
+                outline: 2px solid black;
+            }
+
+            .grid-container.create-region .cell, .grid-container.display-multiple .cell {
+                outline: none;
+            }
+
+            .grid-container.create-region .cell.active {
+                outline: 2px solid black;
+            }
+        `;
+    }
     constructor() {
         super();
+        this.mode = 'create';
+        this.size = 4;
+        this.value = [];
     }
+    render() {
+        const polys = this.mode == 'display-multiple' ? this.value : [ [], this.value ];
 
-    init() {
-        let shadowRoot = this.attachShadow({mode: 'open'});
-        let svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svgEl.style.display = 'inherit';
-        svgEl.style.width = 'inherit';
-        svgEl.style.height = 'inherit';
-        shadowRoot.appendChild(svgEl);
-
-        this.paper = Snap(svgEl);
-
-        if (!this.hasAttribute('size')) this.setAttribute('size', 6);
-        if (!this.hasAttribute('mode')) this.setAttribute('mode', 'create-poly');
-    }
-
-    // Reflect certain properties as attributes:
-
-    get size()          { return _intTransform(this.getAttribute('size')) }
-    set size(arg)       { this.setAttribute('size', arg) }
-
-    get mode()          { return this.getAttribute('mode') }
-    set mode(arg)       { this.setAttribute('mode', arg) }
-
-    connectedCallback() {
-        this.init();
-        this.setPolyomino(null);
-    }
-
-    _calcGeometry() {
-        const padding = 5;
-
-        let width = parseInt(window.getComputedStyle(this).getPropertyValue('width'), 10);
-        let height = parseInt(window.getComputedStyle(this).getPropertyValue('height'), 10);
-
-        this.realWidth = width - padding*2;
-        this.realHeight = height - padding*2;
-
-        this.distX = this.realWidth / this.size;
-        this.distY = this.realHeight / this.size;
-
-        this.originX = padding;
-        this.originY = height - padding - this.distY;
-
-        this.strokeWidth = Math.round(this.realHeight * 0.015);
-        if (this.strokeWidth < 2) this.strokeWidth = 2;
-        if (this.strokeWidth > 5) this.strokeWidth = 5;
-    }
-
-    _updateRect(r, state) {
-        if (this.mode == 'create-poly') {
-            r.attr({
-                fill: state ? 'dodgerblue' : 'white',
-                opacity: 1,
-            });
-        }
-        if (this.mode == 'create-region') {
-            r.attr({
-                fill: state ? 'white' : 'darkgray',
-                opacity: state ? 1 : 0.2,
-            });
-        }
-        if (this.mode == 'display') {
-            r.attr({
-                fill: state ? 'dodgerblue' : 'white',
-                opacity: 1,
-            });
-        }
-    }
-
-    _makeRect(x, y, initialState) {
-        let r = this.paper.rect(this.originX + x * this.distX, this.originY - y * this.distY, this.distX, this.distY);
-        r.attr({
-            stroke: 'black',
-            strokeWidth: this.strokeWidth,
-        });
-
-        this._updateRect(r, initialState);
-
-        if (this.mode == 'create-poly' || this.mode == 'create-region') {
-            r.touchstart(event => {
-                this._touchFlag = true;
-                this.state[x][y] = !this.state[x][y];
-                this._updateRect(r, this.state[x][y]);
-                event.stopPropagation();
-                event.preventDefault();
-            });
-            r.mousedown(event => {
-                if (this._touchFlag) return;
-                this.state[x][y] = !this.state[x][y];
-                this._updateRect(r, this.state[x][y]);
-                event.preventDefault();
-            });
-            r.mouseover(event => {
-                if (this._touchFlag) return;
-                if (event.buttons == 1) {
-                    this.state[x][y] = !this.state[x][y];
-                    this._updateRect(r, this.state[x][y]);
-                    event.preventDefault();
-                }
-            });
-        }
-    }
-
-    redraw() {
-        let cutoff = this._cutoffPolyomino(this.getPolyomino(), this.size);
-        this.setPolyomino(cutoff);
-    }
-
-    setPolyomino(poly=null, fit=false) {
-
-        this.paper.clear();
-
-        if (poly != null && fit) {
-            this.size = Math.max(poly.getWidth(), poly.getHeight());
-        }
-
-        this._calcGeometry();
-
-        // Init a size X size grid of booleans
-        let newState = [];
-        for (let x = 0; x < this.size; x ++) {
-            let row = [];
-            for (let y = 0; y < this.size; y ++) {
-                row.push(false);
-            }
-            newState.push(row);
-        }
-
-        // Fill in with the Polyomino if given
-        if (poly != null) {
-            let nonneg = poly.getMinimalNonNegative();
-            for (let c of nonneg.coords) {
-                let [x, y] = c;
-                newState[x][y] = true;
-            }
-        }
-
-        this.state = newState;
-
-        // Draw
-        for (let x = 0; x < this.size; x ++) {
-            for (let y = 0; y < this.size; y ++) {
-                let on = this.state[x][y];
-                if (on || (this.mode != 'display')) this._makeRect(x, y, on);
-            }
-        }
-    }
-
-    setMultiplePolyominosWithBackground(polys, background) {
-
-        this.paper.clear();
-
-        let rects = [];
-        for (var x = 0; x < this.size; x ++) {
-            let row = [];
-            for (var y = 0; y < this.size; y ++) {
-                row.push(null);
-            }
-            rects.push(row);
-        }
-
-        for (var x = 0; x < this.size; x ++) {
-            for (var y = 0; y < this.size; y ++) {
-                let r = this.paper.rect(this.originX + x * this.distX, this.originY - y * this.distY, this.distX, this.distY);
-                r.attr({
-                    stroke: 'black',
-                    strokeWidth: this.strokeWidth,
-                    fill: 'darkgray',
-                    opacity: 0.2,
-                });
-                rects[x][y] = r;
-            }
-        }
-
-        for (var c of background.coords) {
-            let [x, y] = c;
-            rects[x][y].attr({
-                fill: 'white',
-                opacity: 1
-            });
-        }
-
-        var dHue = Math.round(360 / polys.length);
-        var h = Math.floor(Math.random() * 360);
-
-        for (var poly of polys) {
-
-            h = (h + dHue) % 360;
-            var color = Please.make_color({golden: false, hue: h, saturation: 0.8});
-
-            for (var c of poly.coords) {
-                let [x, y] = c;
-                rects[x][y].attr({
-                    fill: color,
-                    opacity: 1
-                });
-            }
-        }
-
-    }
-
-    getPolyomino() {
-        let coords = [];
-        let limit = Math.min(this.size, this.state.length);
-        for (let x = 0; x < limit; x ++) {
-            for (let y = 0; y < limit; y ++) {
-                if (this.state[x][y]) coords.push([x, y]);
-            }
-        }
-        if (coords.length > 0) {
-            let p = new Polyomino(coords);
-            return p.getMinimalNonNegative();
+        let colorMap = null;
+        if (this.mode == 'display-multiple') {
+            // Generate different colors at each index
+            // Since the first in the list 
+            const dHue = Math.round(360 / (this.value.length - 1));
+            const start = Math.floor(Math.random() * 360);
+            colorMap = [ 'white', ...polys.slice(1).map((p, i) => {
+                const h = (start + dHue * i) % 360;
+                return Please.make_color({ golden: false, hue: h, saturation: 0.8 })[0];
+            }) ];
+        } else if (this.mode == 'create-region') {
+            colorMap = [ 'white', 'white' ];
         } else {
-            return null;
+            colorMap = [ 'white', 'cyan' ];
         }
-    }
 
-    _cutoffPolyomino(p, size) {
-        if (p != null) {
-            let newCoords = p.coords.filter(([x, y]) => x < size && y < size);
-            return (newCoords.length > 0) ? new Polyomino(newCoords) : null;
+        return html`
+            <div class="grid-container ${ this.mode }">
+                ${ Array.from(coords(this.size)).map(([ x, y ]) => {
+                    const col = x + 1;
+                    const row = this.size - y;
+
+                    let classes = [ 'cell' ];
+                    let overrideColor = null;
+                    for (let [ index, p ] of polys.entries()) {
+                        if (p.some(c => compareCoords(c, [ x, y ]))) {
+                            classes.push('active');
+                            overrideColor = colorMap[index];
+                        }
+                    }
+                    const mousedown = e => this.toggle(x, y);
+                    const mouseenter = e => {
+                        if (e.buttons == 1) this.toggle(x, y);
+                    };
+                    const hasEvents = this.mode.startsWith('create');
+                    const optionalColorStyle = overrideColor != null ? `background-color: ${ overrideColor }` : '';
+                    return html`
+                        <div 
+                            class="${ classes.join(' ') }"
+                            style="grid-column: ${ col }; grid-row: ${ row }; ${ optionalColorStyle }"
+                            @mousedown=${ hasEvents ? mousedown : null }
+                            @mouseenter=${ hasEvents ? mouseenter : null }
+                        >
+                        </div>
+                    `;
+                }) }
+            </div>
+        `;
+    }
+    toggle(tx, ty) {
+        const t = [ tx, ty ];
+        let loc = this.value.findIndex(x => compareCoords(x, t));
+        if (loc >= 0) {
+            this.value = this.value.filter((v, i) => i != loc);
         } else {
-            return null;
+            this.value = [ ...this.value, t ];
         }
     }
-
 }
+  
+  
