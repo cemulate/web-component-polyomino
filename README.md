@@ -22,7 +22,7 @@ Or with a script tag (using unpkg), as:
 
 The custom element is now available and may be used in HTML directly as with:
 ```
-<polyomino-control id="editor" size=10 mode="create-region"></polyomino-control>
+<polyomino-control id="editor" size=10 mode="create"></polyomino-control>
 ```
 
 Or from code as with:
@@ -33,30 +33,12 @@ el.mode = 'display';
 document.getElementById('poly-container').appendChild(el);
 ```
 
-The library also exports the following:
-
-* `PolyominoControl`: The actual web component for displaying and editing `Polyomino` instances.
-It is registered as the custom element `polyomino-control` during import, so there should be no need to access this class directly.
-* `Polyomino`: A class representing a polyomino, can be created from integer coordinates and manipulated via transformations.
-The objects that are manipulated by `PolyominoControl` elements.
-* `tetrominos`: An object containing `Polyomino`s for the standard tetrominos from Tetris, keyed by their standard one-letter designation (I, O, T, J, L, S, Z).
-
-One can access these with:
-```
-import { Polyomino, tetrominos } from 'web-component-polyomino';
-```
-
-Or, if using the unkpg script tag,
-```
-const Polyomino = window.webComponentPolyomino.Polyomino;
-const tetrominos = window.webComponentPolyomino.tetrominos;
-```
-
-`PolyominoControl` elements expose two custom attributes:
+`PolyominoControl` elements expose the following attributes:
 
 * `size`: The size of the (square) editing or display grid
+* `value`: The polyomino (or, in `display-multiple` mode only, a list of polyominos) to display, represented as a list of coordinates `[[x1, y1], [x2, y2], ...]`
 * `mode`: One of three string values:
-    - `create-poly`:
+    - `create`:
     The standard mode.
     Background grid cells are white, and filled-in cells representing the object polyomino are light blue.
     - `create-region`:
@@ -64,28 +46,8 @@ const tetrominos = window.webComponentPolyomino.tetrominos;
     Intended primarily for editing a grid region that polyominos might fit in to.
     - `display`:
     Editing is disabled, and background/blank grid cells are not displayed.
-
-And have the following public interface:
-
-* `getPolyomino(p)`: Get the `Polyomino` currently displayed / represented by the element.
-* `setPolyomino(poly=null, fit=false)`: Set the polyomino.
-If `fit` is true, alter the size of the grid to best accomodate the polyomino.
-* `redraw()`: Re-render the current polyomino (after changing `size`, for example)
-* `setMultiplePolyominosWithBackground(polys, background)`: 
-A special method that only works in `display` mode.
-Displays a list of `Polyomino`s each with different colors against a background region again represented by a `Polyomino`
-
-A `Polyomino` is essentially represented by a collection of integer coordinates.
-They provide the following public interface:
-* `constructor(coords)`: Create a polyomino from a list of coordinates of the form `[[x1, y1], [x2, y2], ...]`
-* `clone()`: Retrieve a new polyomino with the same coordinates
-* `rotate(n)`: Retrieve a new polyomino obtained by rotating this one counterclockwise by `n * 90` degrees
-* `reflect()`: Retrieve a new polyomino obtained by reflecting across the y-axis
-* `translate(dx, dy)`: Retrieve a new polyomino obtained by translating this one.
-* `isDisjointFrom(other)`: Determines if two polyominos are disjoint
-* `getMinimalNonNegative()`: Retrieve a new polyomino that is identical to this one, but translated appropriately so that all the coordinates are the smallest possible non-negative integers.
-* `getWidth()` / `getHeight()`: Get the horizontal (resp. vertical) span of the polyomino
-* `containsCoordinate(c)`: Determines if the polyomino contains a coordinate.
+    - `display-multiple`:
+    Given a list of polyominos (in `value`), the first will be treated as a background region, and the rest will be displayed in differing colors on top of the background region.
 
 ## Examples
 
