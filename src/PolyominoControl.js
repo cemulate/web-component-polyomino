@@ -38,11 +38,8 @@ export default class PolyominoControl extends LitElement {
                 grid-template: repeat($rows, 1fr) / repeat($columns, 1fr);
                 grid-gap: 2px;
             }
-            .grid-container.display {
+            .grid-container.display, .grid-container.display-multiple {
                 outline: none;
-            }
-            .grid-container.create-region, .grid-container.display-multiple {
-                background: var(--create-region-background-color, lightgray);
             }
             
             .cell {
@@ -88,8 +85,8 @@ export default class PolyominoControl extends LitElement {
         } else if (this.mode == 'create-region') {
             colorMap = [ 'white', 'white' ];
         } else {
-            const setColor = window.getComputedStyle(this).getPropertyValue('--create-color');
-            colorMap = [ 'white', setColor || 'cyan' ];
+            const cellColor = window.getComputedStyle(this).getPropertyValue('--cell-color');
+            colorMap = [ 'white', cellColor || 'cyan' ];
         }
 
         return html`
