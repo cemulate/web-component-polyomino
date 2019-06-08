@@ -27,6 +27,9 @@ export default class PolyominoControl extends LitElement {
     }
     static get styles() {
         return css`
+            :host {
+                display: block;
+            }
             .grid-container {
                 display: grid;
                 width: 100%;
