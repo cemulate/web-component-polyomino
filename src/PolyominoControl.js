@@ -42,7 +42,7 @@ export default class PolyominoControl extends LitElement {
                 outline: none;
             }
             .grid-container.create-region, .grid-container.display-multiple {
-                background: lightgray;
+                background: var(--create-region-background-color, lightgray);
             }
             
             .cell {
@@ -88,7 +88,8 @@ export default class PolyominoControl extends LitElement {
         } else if (this.mode == 'create-region') {
             colorMap = [ 'white', 'white' ];
         } else {
-            colorMap = [ 'white', 'cyan' ];
+            const setColor = window.getComputedStyle(this).getPropertyValue('--create-color');
+            colorMap = [ 'white', setColor || 'cyan' ];
         }
 
         return html`
