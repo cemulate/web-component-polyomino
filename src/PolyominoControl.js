@@ -130,6 +130,7 @@ export default class PolyominoControl extends LitElement {
         } else {
             this.value = [ ...this.value, t ];
         }
+        this.dispatchEvent(new Event('change'));
     }
 }
   
