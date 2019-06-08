@@ -1,6 +1,6 @@
 {
   "name": "web-component-polyomino",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Web component for creating, editing, or displaying polyominos",
   "main": "dist/web-component-polyomino.js",
   "module": "src/index.js",

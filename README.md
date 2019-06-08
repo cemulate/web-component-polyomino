@@ -22,33 +22,36 @@ Or with a script tag (using unpkg), as:
 
 The custom element is now available and may be used in HTML directly as with:
 ```
-<polyomino-control id="editor" size=10 mode="create"></polyomino-control>
+<polyomino-control size=10 mode="create" value="[[0,0],[0,1],[1,0],[1,1]]"></polyomino-control>
 ```
 
-Or from code as with:
-```
-let el = document.createElement('polyomino-control');
-el.style.cssText = 'width: 50px; height: 50px; display: inline-block';
-el.mode = 'display';
-document.getElementById('poly-container').appendChild(el);
-```
+Attributes on `polyomino-control` elements are as follows:
 
-`PolyominoControl` elements expose the following attributes:
-
-* `size`: The size of the (square) editing or display grid
+* `size`: The size of the (square) editing or display grid.
+Has nothing to do with the style/CSS dimensions of the element, but only the logical polyomino grid.
 * `value`: The polyomino (or, in `display-multiple` mode only, a list of polyominos) to display, represented as a list of coordinates `[[x1, y1], [x2, y2], ...]`
 * `mode`: One of three string values:
     - `create`:
     The standard mode.
-    Background grid cells are white, and filled-in cells representing the object polyomino are light blue.
+    Background grid cells are white, and filled-in cells representing the object polyomino are a chosen active color (`--create-color`)
     - `create-region`:
-    A slightly altered mode much like the above but with tweaked visuals: background cells are subdued gray while filled-in cells are white.
-    Intended primarily for editing a grid region that polyominos might fit in to.
+    Functionally equivalent to `create`, but with an inverse UI:
+    The background is a blank canvas while only the filled in cells are visible and white.
+    Intended for creating the destination areas in polyomino fitting problems, for example.
     - `display`:
     Editing is disabled, and background/blank grid cells are not displayed.
+    Intended for displaying static polyominos.
     - `display-multiple`:
-    Given a list of polyominos (in `value`), the first will be treated as a background region, and the rest will be displayed in differing colors on top of the background region.
+    In this mode, `value` takes a *list* of polyominos, all of which will be displayed.
+    The first of the list is treated as a "backdrop" and will be displayed in white, while the rest will be displayed in differing colors on top.
+
+The component respects the following CSS variables, which can be used to style it:
+
+* `--cell-color`: The color of filled in cells during `create` and `display` mode.
+Default `cyan`.
 
 ## Examples
+
+Here's [a helpful codepen](https://codepen.io/cemulate/pen/dExpJw) showing off most of the features.
 
 This was created / extracted from my other project [polyomino-solver](https://github.com/cemulate/polyomino-solver) (use it [here](https://cemulate.github.io/polyomino-solver)), which can provide examples of its usage.
