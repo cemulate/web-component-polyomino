@@ -3,9 +3,10 @@ web-component-polyomino
 
 A web component for creating, editing, or displaying polyominos (i.e. generalizations of tetris pieces). 
 Useful for games, applications, or solvers that require the user to specify certain polyominos.
-See examples of usage [here](https://cemulate.github.io/polyomino-solver).
 
-[Install from npm](https://www.npmjs.com/package/web-component-polyomino)
+[Install from npm](https://www.npmjs.com/package/web-component-polyomino).
+
+See [an example codepen demo](https://codepen.io/cemulate/pen/dExpJw) or a [project using this component](https://cemulate.github.io/polyomino-solver/).
 
 ## Usage
 
@@ -49,9 +50,3 @@ The component respects the following CSS variables, which can be used to style i
 
 * `--cell-color`: The color of filled in cells during `create` and `display` mode.
 Default `cyan`.
-
-## Examples
-
-Here's [a helpful codepen](https://codepen.io/cemulate/pen/dExpJw) showing off most of the features.
-
-This was created / extracted from my other project [polyomino-solver](https://github.com/cemulate/polyomino-solver) (use it [here](https://cemulate.github.io/polyomino-solver)), which can provide examples of its usage.
