@@ -18,7 +18,7 @@ import 'web-component-polyomino';
 
 Or with a script tag (using unpkg), as:
 ```
-<script src="https://unpkg.com/web-component-polyomino@1/dist/web-component-polyomino.js"/>
+<script src="https://unpkg.com/web-component-polyomino@3.1.2/dist/web-component-polyomino.js"/>
 ```
 
 The custom element is now available and may be used in HTML directly as with:
