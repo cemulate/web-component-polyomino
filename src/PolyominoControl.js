@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import Please from 'pleasejs';
+import { computeColoring } from './coloring';
 
 function* coords(size) {
     for (let i = 0; i < size; i ++) {
@@ -15,6 +15,10 @@ function preventDefault(handler) {
         handler(e);
     }
 }
+
+// const defaulSixColoring = [ 'red', 'green', 'blue', 'cyan', 'magenta', 'yellow' ];
+// const defaulSixColoring = [ 'cyan', 'green', 'red', 'yellow', 'purple', 'orange' ];
+const defaultSixColoring = [ 'bisque', 'cyan', 'royalblue', 'indianred', 'limegreen', 'darkviolet' ];
 
 function compareCoords(a, b) {
     return a[0] == b[0] && a[1] == b[1];
@@ -83,20 +87,23 @@ export default class PolyominoControl extends LitElement {
         this.value = [];
 
         this.pointerDown = false;
+        this.cachedColorMap = null;
+    }
+    updated(changedProps) {
+        if (changedProps.has('value') && this.mode == 'display-multiple') this.computeColoring();
+    }
+    computeColoring() {
+        const coloring = computeColoring(this.value.slice(1));
+        const colors = Array.from({ length: this.value.length - 1 }, (x, i) => defaultSixColoring[coloring.get(i)]);
+        this.cachedColorMap = [ 'white', ...colors ];
     }
     render() {
         const polys = this.mode == 'display-multiple' ? this.value : [ [], this.value ];
 
         let colorMap = null;
         if (this.mode == 'display-multiple') {
-            // Generate different colors at each index
-            // Since the first in the list 
-            const dHue = Math.round(360 / (this.value.length - 1));
-            const start = Math.floor(Math.random() * 360);
-            colorMap = [ 'white', ...polys.slice(1).map((p, i) => {
-                const h = (start + dHue * i) % 360;
-                return Please.make_color({ golden: false, hue: h, saturation: 0.8 })[0];
-            }) ];
+            if (this.cachedColorMap == null) this.computeColoring();
+            colorMap = this.cachedColorMap;
         } else if (this.mode == 'create-region') {
             colorMap = [ 'white', 'white' ];
         } else {
