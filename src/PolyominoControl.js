@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit-element';
+import { LitElement, html, css } from 'lit';
 import Please from 'pleasejs';
 
 function* coords(size) {
@@ -46,6 +46,10 @@ export default class PolyominoControl extends LitElement {
                 outline: 2px solid black;
             }
 
+            .cell.active {
+                background-color: var(--cell-color);
+            }
+
             .grid-container.display .cell {
                 outline: none;
             }
@@ -85,8 +89,7 @@ export default class PolyominoControl extends LitElement {
         } else if (this.mode == 'create-region') {
             colorMap = [ 'white', 'white' ];
         } else {
-            const cellColor = window.getComputedStyle(this).getPropertyValue('--cell-color');
-            colorMap = [ 'white', cellColor || 'cyan' ];
+            colorMap = [ 'white', null ];
         }
 
         return html`
