@@ -9,6 +9,13 @@ function* coords(size) {
     }
 }
 
+function preventDefault(handler) {
+    return e => {
+        e.preventDefault();
+        handler(e);
+    }
+}
+
 function compareCoords(a, b) {
     return a[0] == b[0] && a[1] == b[1];
 }
@@ -29,6 +36,8 @@ export default class PolyominoControl extends LitElement {
         return css`
             :host {
                 display: block;
+                touch-action: none;
+                user-select: none;
             }
             .grid-container {
                 display: grid;
@@ -72,6 +81,8 @@ export default class PolyominoControl extends LitElement {
         this.mode = 'create';
         this.size = 4;
         this.value = [];
+
+        this.pointerDown = false;
     }
     render() {
         const polys = this.mode == 'display-multiple' ? this.value : [ [], this.value ];
@@ -106,18 +117,25 @@ export default class PolyominoControl extends LitElement {
                             overrideColor = colorMap[index];
                         }
                     }
-                    const mousedown = e => this.toggle(x, y);
-                    const mouseenter = e => {
-                        if (e.buttons == 1) this.toggle(x, y);
-                    };
+
+                    const onTouch = preventDefault(e => {
+                        this.pointerDown = true;
+                        this.toggle(x, y);
+                        e.target.releasePointerCapture(e.pointerId);
+                    });
+                    const onMove = preventDefault(e => this.pointerDown ? this.toggle(x, y) : null);
+                    const onRelease = preventDefault(e => { this.pointerDown = false; });
+
                     const hasEvents = this.mode.startsWith('create');
                     const optionalColorStyle = overrideColor != null ? `background-color: ${ overrideColor }` : '';
                     return html`
                         <div 
                             class="${ classes.join(' ') }"
                             style="grid-column: ${ col }; grid-row: ${ row }; ${ optionalColorStyle }"
-                            @mousedown=${ hasEvents ? mousedown : null }
-                            @mouseenter=${ hasEvents ? mouseenter : null }
+                            @pointerdown=${ hasEvents ? onTouch : null }
+                            @pointerenter=${ hasEvents ? onMove : null }
+                            @pointerup=${ hasEvents ? onRelease : null }
+                            @pointercancel=${ hasEvents ? onRelease : null }
                         >
                         </div>
                     `;
