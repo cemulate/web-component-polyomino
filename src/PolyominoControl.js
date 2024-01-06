@@ -16,10 +16,6 @@ function preventDefault(handler) {
     }
 }
 
-// const defaulSixColoring = [ 'red', 'green', 'blue', 'cyan', 'magenta', 'yellow' ];
-// const defaulSixColoring = [ 'cyan', 'green', 'red', 'yellow', 'purple', 'orange' ];
-const defaultSixColoring = [ 'bisque', 'cyan', 'royalblue', 'indianred', 'limegreen', 'darkviolet' ];
-
 function compareCoords(a, b) {
     return a[0] == b[0] && a[1] == b[1];
 }
@@ -59,9 +55,14 @@ export default class PolyominoControl extends LitElement {
                 outline: 2px solid black;
             }
 
-            .cell.active {
-                background-color: var(--cell-color);
-            }
+            .cell.active.cell-color { background-color: var(--cell-color, cyan) }
+            .cell.active.white { background-color: white }
+            .cell.active.c0 { background-color: var(--six-coloring-0, bisque) }
+            .cell.active.c1 { background-color: var(--six-coloring-1, cyan) }
+            .cell.active.c2 { background-color: var(--six-coloring-2, royalblue) }
+            .cell.active.c3 { background-color: var(--six-coloring-3, indianred) }
+            .cell.active.c4 { background-color: var(--six-coloring-4, limegreen) }
+            .cell.active.c5 { background-color: var(--six-coloring-5, darkviolet) }
 
             .grid-container.display .cell {
                 outline: none;
@@ -87,27 +88,30 @@ export default class PolyominoControl extends LitElement {
         this.value = [];
 
         this.pointerDown = false;
-        this.cachedColorMap = null;
+        this.cachedColorClassMap = null;
     }
     updated(changedProps) {
         if (changedProps.has('value') && this.mode == 'display-multiple') this.computeColoring();
     }
     computeColoring() {
+        // In display-multiple, the first polyomino is treated as the region
         const coloring = computeColoring(this.value.slice(1));
-        const colors = Array.from({ length: this.value.length - 1 }, (x, i) => defaultSixColoring[coloring.get(i)]);
-        this.cachedColorMap = [ 'white', ...colors ];
+        const colors = Array.from({ length: this.value.length - 1 }, (x, i) => `c${ coloring.get(i) }`);
+        this.cachedColorClassMap = [ 'white', ...colors ];
     }
     render() {
+        // In display-multiple, the first polyomino is treated as the region,
+        // design for this and imitate otherwise with an empty first poly
         const polys = this.mode == 'display-multiple' ? this.value : [ [], this.value ];
 
-        let colorMap = null;
+        let colorClassMap = null;
         if (this.mode == 'display-multiple') {
-            if (this.cachedColorMap == null) this.computeColoring();
-            colorMap = this.cachedColorMap;
+            if (this.cachedColorClassMap == null) this.computeColoring();
+            colorClassMap = this.cachedColorClassMap;
         } else if (this.mode == 'create-region') {
-            colorMap = [ 'white', 'white' ];
+            colorClassMap = [ 'white', 'white' ];
         } else {
-            colorMap = [ 'white', null ];
+            colorClassMap = [ 'white', 'cell-color' ];
         }
 
         return html`
@@ -116,12 +120,10 @@ export default class PolyominoControl extends LitElement {
                     const col = x + 1;
                     const row = this.size - y;
 
-                    let classes = [ 'cell' ];
-                    let overrideColor = null;
+                    let extraClasses = '';
                     for (let [ index, p ] of polys.entries()) {
                         if (p.some(c => compareCoords(c, [ x, y ]))) {
-                            classes.push('active');
-                            overrideColor = colorMap[index];
+                            extraClasses = `active ${ colorClassMap[index] }`;
                         }
                     }
 
@@ -134,11 +136,10 @@ export default class PolyominoControl extends LitElement {
                     const onRelease = preventDefault(e => { this.pointerDown = false; });
 
                     const hasEvents = this.mode.startsWith('create');
-                    const optionalColorStyle = overrideColor != null ? `background-color: ${ overrideColor }` : '';
                     return html`
                         <div 
-                            class="${ classes.join(' ') }"
-                            style="grid-column: ${ col }; grid-row: ${ row }; ${ optionalColorStyle }"
+                            class="cell ${ extraClasses }"
+                            style="grid-column: ${ col }; grid-row: ${ row }"
                             @pointerdown=${ hasEvents ? onTouch : null }
                             @pointerenter=${ hasEvents ? onMove : null }
                             @pointerup=${ hasEvents ? onRelease : null }
