@@ -34,19 +34,22 @@ Has nothing to do with the style/CSS dimensions of the element, but only the log
 * `mode`: One of three string values:
     - `create`:
     The standard mode.
-    Background grid cells are white, and filled-in cells representing the object polyomino are a chosen active color (`--create-color`)
+    Background grid cells are white, and filled-in cells representing the object polyomino are a chosen color controlled by the CSS variable `--cell-color`
     - `create-region`:
     Functionally equivalent to `create`, but with an inverse UI:
     The background is a blank canvas while only the filled in cells are visible and white.
     Intended for creating the destination areas in polyomino fitting problems, for example.
     - `display`:
     Editing is disabled, and background/blank grid cells are not displayed.
-    Intended for displaying static polyominos.
+    Intended for displaying static polyominos (with color `--cell-color`)
     - `display-multiple`:
     In this mode, `value` takes a *list* of polyominos, all of which will be displayed.
     The first of the list is treated as a "backdrop" and will be displayed in white, while the rest will be displayed in differing colors on top.
+    The component uses a straightforward naive algorithm to 6-color the pieces so that no adjacent pieces have the same color.
+    These six colors can be controlled with the CSS variables `--six-coloring-0` through `--six-coloring-5`.
 
 The component respects the following CSS variables, which can be used to style it:
 
 * `--cell-color`: The color of filled in cells during `create` and `display` mode.
 Default `cyan`.
+* `--six-coloring-0, ..., --six-coloring-5`: The colors to use in `display-multiple` so that adjacent polyominos don't share a color. Default `bisque, cyan, royalblue, indianred, limegreen, orange`
