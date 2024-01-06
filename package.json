@@ -1,6 +1,6 @@
 {
   "name": "web-component-polyomino",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Web component for creating, editing, or displaying polyominos",
   "main": "dist/web-component-polyomino.js",
   "module": "src/index.js",
@@ -14,8 +14,10 @@
   ],
   "author": "Chase Meadors <c.ed.mead@gmail.com>",
   "license": "ISC",
+  "dependencies": {
+    "lit": "^3.1.0"
+  },
   "devDependencies": {
-    "lit": "^3.1.0",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   }
